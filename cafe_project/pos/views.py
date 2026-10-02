@@ -4,6 +4,7 @@ from django.http import HttpResponse
 from .models import Order, Category, MenuItem
 from .services import (
     ConcreteProduct, Milk, Syrup, TemperatureDecorator, SweetnessDecorator,
+    CashPayment, PromptPayPayment,
     CheckoutFacade, OrderCart, InventoryManager,
     CsvReportGenerator, TxtReportGenerator
 )
@@ -89,21 +90,42 @@ def cart(request):
                     
                     order_cart.add_item(beverage)
 
-            promo_code = request.POST.get('promo_code', '')
+            promo_code = request.POST.get('promo_code', '').strip()
+            payment_type = request.POST.get('payment_method', 'cash')
             
-            facade = CheckoutFacade()
+            # Select Payment Strategy (Strategy Pattern)
             try:
-                order_data = facade.place_order(order_cart, promo_code)
-                Order.objects.create(
+                if payment_type == 'promptpay':
+                    payment_strategy = PromptPayPayment()
+                else:
+                    cash_input = request.POST.get('cash_amount', '').strip()
+                    amount_tendered = float(cash_input) if cash_input else None
+                    payment_strategy = CashPayment(amount_tendered=amount_tendered)
+
+                facade = CheckoutFacade()
+                order_data = facade.place_order(order_cart, promo_code, payment_strategy=payment_strategy)
+                pay_info = order_data['payment_info']
+
+                order = Order.objects.create(
                     description=order_data['description'],
                     total_cost=order_data['total_cost'],
-                    status=order_data['initial_status']
+                    status=order_data['initial_status'],
+                    payment_method=pay_info['payment_method'],
+                    amount_paid=pay_info['amount_paid'],
+                    change_amount=pay_info['change'],
+                    payment_ref=pay_info['reference']
                 )
-                request.session['cart'] = [] 
-                messages.success(request, f"Order placed successfully! Total: {order_data['total_cost']} THB")
-                return redirect('menu')
+                request.session['cart'] = []
+                
+                if pay_info['payment_method'] == 'CASH':
+                    messages.success(request, f"สั่งซื้อสำเร็จ! คิว #{order.id} | ชำระเงินสด {order.total_cost} ฿ (รับเงิน {order.amount_paid} ฿, เงินทอน {order.change_amount} ฿)")
+                else:
+                    messages.success(request, f"สั่งซื้อสำเร็จ! คิว #{order.id} | ชำระผ่านพร้อมเพย์ {order.total_cost} ฿ (Ref: {order.payment_ref})")
+                    
+                return redirect('customer_queue')
             except ValueError as e:
                 messages.error(request, str(e))
+                return redirect('cart')
                 
         elif 'change_qty' in request.POST:
             index = int(request.POST.get('item_index'))
@@ -134,6 +156,8 @@ def cart(request):
 
     enriched_cart = []
     cart_subtotal = 0.0
+    item_ids = [item['id'] for item in cart_data if 'id' in item]
+    menu_map = {m.id: m for m in MenuItem.objects.filter(id__in=item_ids)} if item_ids else {}
     for idx, item in enumerate(cart_data):
         qty = int(item.get('quantity', 1))
         unit_price = float(item['price'])
@@ -141,9 +165,12 @@ def cart(request):
         if item.get('syrup'): unit_price += 10.0
         row_total = unit_price * qty
         cart_subtotal += row_total
+        menu_obj = menu_map.get(item.get('id'))
+        img_url = menu_obj.get_image if menu_obj else ''
         enriched_cart.append({
             **item,
             'index': idx,
+            'image_url': img_url,
             'quantity': qty,
             'unit_price': unit_price,
             'total_price': row_total
@@ -287,13 +314,57 @@ def custom_admin(request):
             DiscountCode.objects.filter(id=request.POST.get('code_id')).delete()
             messages.success(request, "Discount code deleted!")
             
+        elif action == 'add_recipe':
+            menu_id = request.POST.get('menu_id')
+            ing_id = request.POST.get('ingredient_id')
+            qty_req = int(request.POST.get('quantity_required', 1))
+            from .models import RecipeItem
+            RecipeItem.objects.create(
+                menu_item_id=menu_id,
+                ingredient_id=ing_id,
+                quantity_required=qty_req
+            )
+            messages.success(request, "สูตรเมนูถูกผูกเข้ากับวัตถุดิบเรียบร้อยแล้ว!")
+            
+        elif action == 'delete_recipe':
+            from .models import RecipeItem
+            RecipeItem.objects.filter(id=request.POST.get('recipe_id')).delete()
+            messages.success(request, "ลบสูตรวัตถุดิบเรียบร้อยแล้ว!")
+            
         return redirect('custom_admin')
 
+    from .models import RecipeItem
     context = {
-        'menu_items': MenuItem.objects.all(),
+        'menu_items': MenuItem.objects.prefetch_related('recipe_items__ingredient').all(),
         'categories': Category.objects.all(),
         'inventory_items': InventoryItem.objects.all(),
         'discount_codes': DiscountCode.objects.all(),
+        'recipe_items': RecipeItem.objects.select_related('menu_item', 'ingredient').all(),
     }
     return render(request, 'pos/custom_admin.html', context)
+
+from django.http import JsonResponse
+
+def customer_queue(request):
+    """Customer-facing live queue display board"""
+    preparing_orders = Order.objects.filter(status__in=['PENDING', 'BREWING']).order_by('created_at')
+    ready_orders = Order.objects.filter(status='COMPLETED').order_by('-created_at')[:12]
+    
+    return render(request, 'pos/customer_queue.html', {
+        'preparing_orders': preparing_orders,
+        'ready_orders': ready_orders
+    })
+
+def api_orders(request):
+    """JSON API for real-time customer queue polling"""
+    pending = list(Order.objects.filter(status='PENDING').order_by('created_at').values('id', 'status', 'description'))
+    brewing = list(Order.objects.filter(status='BREWING').order_by('created_at').values('id', 'status', 'description'))
+    completed = list(Order.objects.filter(status='COMPLETED').order_by('-created_at')[:12].values('id', 'status', 'description'))
+    
+    return JsonResponse({
+        'pending': pending,
+        'brewing': brewing,
+        'completed': completed
+    })
+
 

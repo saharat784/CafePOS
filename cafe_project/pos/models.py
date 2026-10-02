@@ -27,6 +27,14 @@ class InventoryItem(models.Model):
     
     def __str__(self): return f"{self.name}: {self.quantity}"
 
+class RecipeItem(models.Model):
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='recipe_items')
+    ingredient = models.ForeignKey(InventoryItem, on_delete=models.CASCADE)
+    quantity_required = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.menu_item.name} -> {self.quantity_required}x {self.ingredient.name}"
+
 class DiscountCode(models.Model):
     code = models.CharField(max_length=20, unique=True)
     discount_amount = models.DecimalField(max_digits=6, decimal_places=2, default=0) # Flat amount
@@ -45,6 +53,10 @@ class Order(models.Model):
     description = models.TextField()
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    payment_method = models.CharField(max_length=20, default='CASH') # CASH, PROMPTPAY
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    change_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    payment_ref = models.CharField(max_length=100, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

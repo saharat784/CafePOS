@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cafe POS - Cart</title>
+    <title>Cafe POS - Your Tray</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-stone-100 text-stone-800 font-sans p-6 md:p-12">
+<body class="bg-stone-100 text-stone-800 font-sans p-4 md:p-8 min-h-screen flex flex-col">
     <!-- Navbar -->
-    <nav class="mb-8 flex space-x-4 items-center bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+    <nav class="mb-8 flex flex-wrap gap-2 items-center bg-white p-4 rounded-xl shadow-sm border border-stone-200">
         <div class="text-2xl font-bold text-amber-800 mr-4 tracking-tight">☕ CozyCafe POS</div>
         <a href="{% url 'menu' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Menu</a>
         <a href="{% url 'cart' %}" class="px-4 py-2 bg-amber-700 text-white font-semibold rounded-lg shadow hover:bg-amber-800 transition">Cart ({{ cart_count }})</a>
+        <a href="{% url 'customer_queue' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Customer Queue</a>
         <a href="{% url 'barista' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Barista KDS</a>
         <a href="{% url 'inventory' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Inventory</a>
         <a href="{% url 'custom_admin' %}" class="px-4 py-2 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition ml-auto">Manager Admin</a>
@@ -19,142 +20,350 @@
 
     <!-- Messages -->
     {% if messages %}
-    <div class="mb-4 max-w-3xl mx-auto">
+    <div class="mb-6 max-w-6xl mx-auto w-full">
         {% for message in messages %}
-        <div class="p-4 mb-2 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %} shadow-sm border">
-            {{ message }}
+        <div class="p-4 mb-2 rounded-xl {% if message.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-800{% else %}bg-emerald-50 border-emerald-200 text-emerald-800{% endif %} shadow-xs border flex items-center justify-between">
+            <span class="font-medium text-sm">{{ message }}</span>
         </div>
         {% endfor %}
     </div>
     {% endif %}
 
-    <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-8 border border-stone-100">
-        <div class="flex justify-between items-end mb-6 border-b border-amber-200 pb-4">
-            <h2 class="text-3xl font-bold text-amber-900 font-serif">Your Tray</h2>
-            <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">Composite Pattern</span>
-        </div>
-
-        <div class="mb-8 overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="border-b border-stone-200 text-stone-500 uppercase text-xs tracking-wider">
-                        <th class="pb-3 font-semibold pl-2">Order Item</th>
-                        <th class="pb-3 text-right font-semibold">Price</th>
-                        <th class="pb-3 text-center font-semibold w-28">จำนวน</th>
-                        <th class="pb-3 text-right font-semibold">Total</th>
-                        <th class="pb-3 text-center font-semibold w-20">จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-stone-100">
-                    {% for item in cart_items %}
-                    <tr class="group hover:bg-stone-50 transition">
-                        <td class="py-4 pl-2 align-middle">
-                            <div>
-                                <span class="font-bold text-stone-800 text-base md:text-lg">{{ item.name }}</span>
-                                {% if item.temperature or item.sweetness or item.milk or item.syrup %}
-                                <div class="flex flex-wrap gap-1 mt-1">
-                                    {% if item.temperature %}
-                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-md border {% if item.temperature == 'เย็น' %}bg-sky-50 text-sky-700 border-sky-200{% else %}bg-orange-50 text-orange-700 border-orange-200{% endif %}">
-                                        {% if item.temperature == 'เย็น' %}❄️ เย็น{% else %}🔥 ร้อน{% endif %}
-                                    </span>
-                                    {% endif %}
-                                    {% if item.sweetness %}
-                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
-                                        🍯 หวาน {{ item.sweetness }}
-                                    </span>
-                                    {% endif %}
-                                    {% if item.milk %}
-                                    <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
-                                        +นม (+15฿)
-                                    </span>
-                                    {% endif %}
-                                    {% if item.syrup %}
-                                    <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
-                                        +ไซรัป (+10฿)
-                                    </span>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </td>
-                        <td class="py-4 text-right font-medium text-stone-600 text-sm align-middle">{{ item.unit_price }} ฿</td>
-                        <td class="py-4 text-center align-middle w-28">
-                            <div class="inline-flex items-center space-x-1.5 bg-stone-100 p-1 rounded-lg border border-stone-200">
-                                <form method="POST" class="inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="change_qty" value="1">
-                                    <input type="hidden" name="item_index" value="{{ item.index }}">
-                                    <input type="hidden" name="qty_action" value="decrease">
-                                    <button type="submit" class="w-6 h-6 rounded bg-white hover:bg-stone-200 text-stone-700 font-bold flex items-center justify-center shadow-sm border border-stone-200 transition text-sm leading-none focus:outline-none" title="ลดจำนวน">
-                                        -
-                                    </button>
-                                </form>
-                                <span class="w-6 text-center font-bold text-stone-800 text-sm">{{ item.quantity }}</span>
-                                <form method="POST" class="inline">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="change_qty" value="1">
-                                    <input type="hidden" name="item_index" value="{{ item.index }}">
-                                    <input type="hidden" name="qty_action" value="increase">
-                                    <button type="submit" class="w-6 h-6 rounded bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center justify-center shadow-sm transition text-sm leading-none focus:outline-none" title="เพิ่มจำนวน">
-                                        +
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                        <td class="py-4 text-right font-bold text-stone-800 text-base align-middle">{{ item.total_price }} ฿</td>
-                        <td class="py-4 text-center align-middle w-20">
-                            <form method="POST" class="inline-block">
-                                {% csrf_token %}
-                                <input type="hidden" name="remove_item" value="1">
-                                <input type="hidden" name="item_index" value="{{ item.index }}">
-                                <button type="submit" class="px-2.5 py-1 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border border-red-200 rounded text-xs font-semibold transition shadow-sm" title="ลบรายการนี้">
-                                    ลบ
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="py-12 text-center text-stone-400 italic">Your tray is empty. Go back to Menu to add delicious items!</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Expanded "Your Tray" Main Card -->
+    <div class="max-w-6xl mx-auto w-full bg-white rounded-2xl shadow-md overflow-hidden p-6 md:p-8 lg:p-10 border border-stone-200">
+        
+        <!-- Tray Header -->
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center pb-6 mb-8 border-b border-stone-200 gap-4">
+            <div>
+                <div class="flex items-center space-x-3">
+                    <h2 class="text-2xl md:text-3xl font-black text-amber-950 font-serif tracking-tight">Your Tray</h2>
+                    <span class="bg-amber-100 text-amber-900 text-xs font-bold px-3 py-1 rounded-full border border-amber-200">
+                        {{ cart_count }} รายการ
+                    </span>
+                </div>
+                <p class="text-sm text-stone-500 mt-1">ตรวจสอบรายการเครื่องดื่มและของหวานในถาดก่อนชำระเงิน</p>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <a href="{% url 'menu' %}" class="inline-flex items-center space-x-1.5 px-4 py-2 bg-amber-50 hover:bg-amber-100 text-amber-800 text-sm font-bold rounded-xl border border-amber-200 transition">
+                    <span>สั่งเมนูเพิ่ม (Go to Menu)</span>
+                </a>
+                <span class="hidden md:inline-block text-xs font-bold text-amber-700 bg-amber-100/70 px-3 py-1.5 rounded-lg border border-amber-200">
+                    Composite Pattern
+                </span>
+            </div>
         </div>
 
         {% if cart_items %}
-        <div class="bg-stone-50 p-6 rounded-xl border border-stone-200 shadow-inner">
-            <form method="POST">
-                {% csrf_token %}
-                <input type="hidden" name="checkout" value="1">
-                
-                <div class="flex justify-between items-center mb-6 pb-4 border-b border-stone-200">
-                    <span class="font-bold text-stone-700 text-base">ยอดรวมทั้งสิ้น (Subtotal)</span>
-                    <span class="font-black text-2xl text-amber-800">{{ cart_subtotal }} ฿</span>
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-sm font-bold text-stone-700 mb-2">Discount Code <span class="text-xs text-amber-700 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded font-normal ml-2">Chain of Responsibility</span></label>
-                    <input type="text" name="promo_code" placeholder="Enter code (e.g. DISCOUNT10, HALFPRICE)" class="w-full border border-stone-300 rounded-lg px-4 py-3 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 bg-white">
-                </div>
-
-                <div class="flex flex-col space-y-3">
-                    <button type="submit" class="w-full py-4 px-6 rounded-lg shadow-md font-bold text-white text-lg bg-green-700 hover:bg-green-800 transition flex justify-center items-center">
-                        Checkout & Pay
-                        <span class="text-xs ml-3 bg-green-900 text-green-100 px-2 py-1 rounded">Facade Pattern</span>
-                    </button>
-                </div>
-            </form>
+        <!-- 2-Column Split Grid for Wider Display -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            <form method="POST" class="mt-4 text-center">
-                {% csrf_token %}
-                <input type="hidden" name="clear_cart" value="1">
-                <button type="submit" class="text-red-500 hover:text-red-700 underline text-sm transition font-medium">
-                    Empty Tray
-                </button>
-            </form>
+            <!-- Left Side: Order Items Table (8 cols on large screens) -->
+            <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+                <div class="bg-stone-50/70 rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-stone-100 border-b border-stone-200 text-stone-600 uppercase text-xs font-bold tracking-wider">
+                                <tr>
+                                    <th class="py-3.5 pl-4 pr-2">รายการสินค้า</th>
+                                    <th class="py-3.5 px-3 text-right">ราคา</th>
+                                    <th class="py-3.5 px-3 text-center w-32">จำนวน</th>
+                                    <th class="py-3.5 px-3 text-right">รวม</th>
+                                    <th class="py-3.5 pr-4 text-center w-20">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-200/80 bg-white">
+                                {% for item in cart_items %}
+                                <tr class="hover:bg-amber-50/30 transition group">
+                                    <!-- Item Name & Customizations & Image -->
+                                    <td class="py-4 pl-4 pr-2 align-middle">
+                                        <div class="flex items-center space-x-3.5">
+                                            {% if item.image_url %}
+                                            <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-14 h-14 md:w-16 md:h-16 object-cover rounded-xl border border-stone-200 bg-stone-100 shadow-xs flex-shrink-0">
+                                            {% endif %}
+                                            <div class="min-w-0">
+                                                <span class="font-bold text-stone-900 text-base md:text-lg block group-hover:text-amber-900 transition">
+                                                    {{ item.name }}
+                                                </span>
+                                                {% if item.temperature or item.sweetness or item.milk or item.syrup %}
+                                                <div class="flex flex-wrap gap-1.5 mt-1.5">
+                                                    {% if item.temperature %}
+                                                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-md border {% if item.temperature == 'เย็น' %}bg-sky-50 text-sky-700 border-sky-200{% else %}bg-orange-50 text-orange-700 border-orange-200{% endif %}">
+                                                        {% if item.temperature == 'เย็น' %}เย็น{% else %}ร้อน{% endif %}
+                                                    </span>
+                                                    {% endif %}
+                                                    {% if item.sweetness %}
+                                                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200">
+                                                        หวาน {{ item.sweetness }}
+                                                    </span>
+                                                    {% endif %}
+                                                    {% if item.milk %}
+                                                    <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
+                                                        +นม (+15฿)
+                                                    </span>
+                                                    {% endif %}
+                                                    {% if item.syrup %}
+                                                    <span class="text-[11px] font-medium px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 border border-stone-200">
+                                                        +ไซรัป (+10฿)
+                                                    </span>
+                                                    {% endif %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <!-- Unit Price -->
+                                    <td class="py-4 px-3 text-right font-medium text-stone-600 text-sm md:text-base align-middle whitespace-nowrap">
+                                        {{ item.unit_price }} ฿
+                                    </td>
+
+                                    <!-- Quantity Stepper -->
+                                    <td class="py-4 px-3 text-center align-middle whitespace-nowrap">
+                                        <div class="inline-flex items-center space-x-2 bg-stone-100 p-1.5 rounded-xl border border-stone-200 shadow-2xs">
+                                            <form method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="change_qty" value="1">
+                                                <input type="hidden" name="item_index" value="{{ item.index }}">
+                                                <input type="hidden" name="qty_action" value="decrease">
+                                                <button type="submit" class="w-7 h-7 rounded-lg bg-white hover:bg-stone-200 active:scale-95 text-stone-700 font-black flex items-center justify-center shadow-xs border border-stone-200 transition text-sm leading-none focus:outline-none" title="ลดจำนวน">
+                                                    -
+                                                </button>
+                                            </form>
+                                            <span class="w-6 text-center font-black text-stone-900 text-sm md:text-base">{{ item.quantity }}</span>
+                                            <form method="POST" class="inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="change_qty" value="1">
+                                                <input type="hidden" name="item_index" value="{{ item.index }}">
+                                                <input type="hidden" name="qty_action" value="increase">
+                                                <button type="submit" class="w-7 h-7 rounded-lg bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-black flex items-center justify-center shadow-xs transition text-sm leading-none focus:outline-none" title="เพิ่มจำนวน">
+                                                    +
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+
+                                    <!-- Total Price -->
+                                    <td class="py-4 px-3 text-right font-bold text-amber-950 text-base md:text-lg align-middle whitespace-nowrap">
+                                        {{ item.total_price }} ฿
+                                    </td>
+
+                                    <!-- Remove Button -->
+                                    <td class="py-4 pr-4 text-center align-middle whitespace-nowrap">
+                                        <form method="POST" class="inline-block">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="remove_item" value="1">
+                                            <input type="hidden" name="item_index" value="{{ item.index }}">
+                                            <button type="submit" class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition shadow-2xs" title="ลบรายการนี้">
+                                                ลบ
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Bottom tray actions (Clear Tray & Back to Menu) -->
+                <div class="flex flex-wrap justify-between items-center pt-2 gap-4">
+                    <a href="{% url 'menu' %}" class="inline-flex items-center space-x-2 text-stone-600 hover:text-amber-800 text-sm font-bold transition">
+                        <span>← เลือกเมนูเครื่องดื่มหรือของหวานเพิ่ม</span>
+                    </a>
+
+                    <form method="POST" onsubmit="return confirm('ยืนยันต้องการล้างรายการในถาดทั้งหมด?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="clear_cart" value="1">
+                        <button type="submit" class="inline-flex items-center space-x-1.5 text-rose-500 hover:text-rose-700 hover:underline text-sm font-semibold transition">
+                            <span>ล้างถาดทั้งหมด (Empty Tray)</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Side: Order Summary & Payment Gateway Form (4-5 cols on large screens, sticky) -->
+            <div class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-6">
+                <div class="bg-stone-50 rounded-2xl border border-stone-200 p-6 md:p-7 shadow-xs space-y-6">
+                    <form method="POST" class="space-y-6">
+                        {% csrf_token %}
+                        <input type="hidden" name="checkout" value="1">
+
+                        <!-- Summary Header -->
+                        <div class="border-b border-stone-200 pb-4">
+                            <h3 class="font-black text-stone-900 text-lg flex items-center justify-between">
+                                <span>สรุปยอดและชำระเงิน</span>
+                                <span class="text-xs font-bold bg-stone-200 text-stone-700 px-2.5 py-0.5 rounded-full">สุทธิ</span>
+                            </h3>
+                            <div class="flex justify-between items-baseline mt-4">
+                                <span class="font-bold text-stone-600 text-sm">ยอดรวมทั้งสิ้น (Total)</span>
+                                <span class="font-black text-3xl text-amber-900">{{ cart_subtotal }} <span class="text-lg">฿</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Coupon Code (Chain of Responsibility) -->
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="block text-xs font-bold text-stone-700 uppercase">โค้ดส่วนลด (Promo Code)</label>
+                                <span class="text-[10px] text-amber-800 bg-amber-100 border border-amber-200 px-2 py-0.5 rounded font-bold">
+                                    Chain of Responsibility
+                                </span>
+                            </div>
+                            <input type="text" name="promo_code" placeholder="เช่น DISCOUNT10, HALFPRICE" class="w-full border border-stone-300 rounded-xl px-4 py-2.5 uppercase font-mono tracking-wider focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600 bg-white text-sm">
+                        </div>
+
+                        <!-- Payment Strategy Selector (Strategy Pattern) -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2.5">
+                                <label class="block text-xs font-bold text-stone-700 uppercase">
+                                    ช่องทางชำระเงิน (Payment Gateway)
+                                </label>
+                                <span class="text-[10px] text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded font-bold">
+                                    Strategy Pattern
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <!-- Option 1: Cash -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="payment_method" value="cash" checked onchange="togglePaymentGateway('cash')" class="peer sr-only">
+                                    <div class="p-3 rounded-xl border-2 border-stone-200 bg-white peer-checked:border-amber-600 peer-checked:bg-amber-50/80 transition flex items-center space-x-2.5 shadow-2xs">
+                                        <span class="text-xl"></span>
+                                        <div>
+                                            <div class="font-bold text-stone-900 text-sm">เงินสด</div>
+                                            <div class="text-[10px] text-stone-500">คำนวณเงินทอน</div>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                <!-- Option 2: PromptPay -->
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="payment_method" value="promptpay" onchange="togglePaymentGateway('promptpay')" class="peer sr-only">
+                                    <div class="p-3 rounded-xl border-2 border-stone-200 bg-white peer-checked:border-sky-600 peer-checked:bg-sky-50/80 transition flex items-center space-x-2.5 shadow-2xs">
+                                        <span class="text-xl"></span>
+                                        <div>
+                                            <div class="font-bold text-stone-900 text-sm">พร้อมเพย์</div>
+                                            <div class="text-[10px] text-stone-500">Thai QR Code</div>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Cash Details Sub-form -->
+                            <div id="cash-panel" class="bg-white p-4 rounded-xl border border-stone-200 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <label class="text-[11px] font-bold text-stone-600 uppercase">เงินสดที่รับมา (บาท):</label>
+                                    <span class="text-[11px] text-stone-400">ว่างไว้หากรับพอดี</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="number" step="0.01" id="cash_amount_input" name="cash_amount" placeholder="{{ cart_subtotal }}" oninput="updateChangeCalculation()" class="w-full border border-stone-300 rounded-lg px-3.5 py-2 font-black text-lg text-stone-900 focus:outline-none focus:border-amber-600 focus:ring-1 focus:ring-amber-600">
+                                    <span class="absolute right-3 top-2.5 text-stone-400 font-bold text-sm">฿</span>
+                                </div>
+                                
+                                <!-- Quick Cash Shortcuts -->
+                                <div class="flex flex-wrap gap-1.5 pt-1 items-center">
+                                    <span class="text-[11px] text-stone-500 mr-1 font-medium">ปุ่มลัด:</span>
+                                    <button type="button" onclick="setCashAmount({{ cart_subtotal }})" class="px-2.5 py-1 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-md text-xs font-bold transition">พอดี</button>
+                                    <button type="button" onclick="setCashAmount(100)" class="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-md text-xs font-bold transition">100 ฿</button>
+                                    <button type="button" onclick="setCashAmount(500)" class="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-md text-xs font-bold transition">500 ฿</button>
+                                    <button type="button" onclick="setCashAmount(1000)" class="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-md text-xs font-bold transition">1,000 ฿</button>
+                                </div>
+
+                                <div id="change-display" class="pt-2.5 border-t border-stone-100 flex justify-between items-center text-sm">
+                                    <span class="text-stone-600 font-medium text-xs">เงินทอนโดยประมาณ:</span>
+                                    <span id="change-value" class="font-black text-emerald-700 text-base">0.00 ฿ (รับพอดี)</span>
+                                </div>
+                            </div>
+
+                            <!-- PromptPay QR Card Preview -->
+                            <div id="promptpay-panel" class="hidden bg-white p-4 rounded-xl border border-sky-200 text-center space-y-2.5">
+                                <div class="inline-flex items-center space-x-1.5 bg-sky-950 text-white px-3 py-1 rounded-md text-[11px] font-bold shadow-xs">
+                                    <span>THAI QR PAYMENT</span>
+                                </div>
+                                <div class="flex justify-center py-1">
+                                    <div class="p-2.5 bg-white border-2 border-sky-800 rounded-xl shadow-inner inline-block">
+                                        <svg class="w-28 h-28 mx-auto text-sky-950" viewBox="0 0 100 100" fill="currentColor">
+                                            <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z" />
+                                            <path d="M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z" />
+                                            <path d="M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z" />
+                                            <path d="M40,10 h20 v10 h-20 z M40,30 h10 v20 h-10 z M60,30 h10 v10 h-10 z M50,50 h30 v10 h-30 z M40,70 h10 v20 h-10 z M60,70 h20 v10 h-20 z M70,80 h20 v20 h-20 z" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-stone-800 font-bold">สแกนชำระ {{ cart_subtotal }} บาท ผ่าน Mobile Banking</p>
+                                <p class="text-[10px] text-stone-400">ระบบจะออกเลขอ้างอิง PromptPay Reference ให้อัตโนมัติ</p>
+                            </div>
+                        </div>
+
+                        <!-- Big Checkout Button -->
+                        <button type="submit" class="w-full py-4 px-6 rounded-xl shadow-md font-bold text-white text-base md:text-lg bg-emerald-700 hover:bg-emerald-800 active:scale-[0.99] transition flex flex-col justify-center items-center">
+                            <span>ยืนยันการสั่งซื้อและชำระเงิน</span>
+                            <span class="text-[11px] text-emerald-200 font-normal mt-0.5">Checkout & Pay (Facade Pattern)</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        {% else %}
+        <!-- Empty Tray State -->
+        <div class="py-16 px-6 text-center">
+            <div class="w-24 h-24 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-200">
+                <span class="text-5xl"></span>
+            </div>
+            <h3 class="text-2xl font-black text-amber-950 mb-2 font-serif">ถาดของคุณยังไม่มีรายการสั่งซื้อ</h3>
+            <p class="text-stone-500 max-w-md mx-auto text-sm mb-6 leading-relaxed">
+                ยังไม่มีเครื่องดื่มหรือของหวานในถาด กรุณาเลือกดูเมนูเครื่องดื่มสูตรพิเศษและขนมหวานของเราเพื่อเริ่มสั่งซื้อ
+            </p>
+            <a href="{% url 'menu' %}" class="inline-flex items-center space-x-2 px-8 py-3.5 bg-amber-700 hover:bg-amber-800 text-white font-bold rounded-xl shadow-md transition text-base">
+                <span>ไปเลือกเมนูสินค้า (Go to Menu)</span>
+            </a>
         </div>
         {% endif %}
+
     </div>
+
+    <!-- Client-side Scripts -->
+    <script>
+    const subtotal = parseFloat("{{ cart_subtotal|default:'0' }}");
+
+    function togglePaymentGateway(method) {
+        const cashPanel = document.getElementById('cash-panel');
+        const promptpayPanel = document.getElementById('promptpay-panel');
+        if (method === 'cash') {
+            cashPanel.classList.remove('hidden');
+            promptpayPanel.classList.add('hidden');
+        } else {
+            cashPanel.classList.add('hidden');
+            promptpayPanel.classList.remove('hidden');
+        }
+    }
+
+    function setCashAmount(val) {
+        document.getElementById('cash_amount_input').value = val;
+        updateChangeCalculation();
+    }
+
+    function updateChangeCalculation() {
+        const inputVal = document.getElementById('cash_amount_input').value.trim();
+        const changeValueEl = document.getElementById('change-value');
+        if (!inputVal) {
+            changeValueEl.textContent = '0.00 ฿ (รับพอดี)';
+            changeValueEl.className = 'font-bold text-stone-500 text-base';
+            return;
+        }
+        const tendered = parseFloat(inputVal);
+        const change = tendered - subtotal;
+        if (change >= 0) {
+            changeValueEl.textContent = change.toFixed(2) + ' ฿';
+            changeValueEl.className = 'font-black text-emerald-700 text-base';
+        } else {
+            const short = Math.abs(change);
+            changeValueEl.textContent = 'ขาดอีก ' + short.toFixed(2) + ' ฿';
+            changeValueEl.className = 'font-black text-red-600 text-base';
+        }
+    }
+    </script>
 </body>
 </html>

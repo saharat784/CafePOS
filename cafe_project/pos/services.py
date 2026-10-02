@@ -6,6 +6,8 @@ class Beverage(ABC):
     def get_description(self) -> str: pass
     @abstractmethod
     def cost(self) -> float: pass
+    @abstractmethod
+    def get_required_ingredients(self) -> list: pass
 
 class ConcreteProduct(Beverage):
     def __init__(self, menu_item):
@@ -13,9 +15,18 @@ class ConcreteProduct(Beverage):
         
     def get_description(self) -> str: return self.menu_item.name
     def cost(self) -> float: return float(self.menu_item.price)
+    
+    def get_required_ingredients(self) -> list:
+        # Dynamic Recipe Model integration (No hardcoded string matching)
+        ingredients = []
+        for r in self.menu_item.recipe_items.select_related('ingredient').all():
+            ingredients.append((r.ingredient.name, r.quantity_required))
+        return ingredients
 
 class BeverageDecorator(Beverage):
     def __init__(self, beverage: Beverage): self._beverage = beverage
+    def get_required_ingredients(self) -> list:
+        return self._beverage.get_required_ingredients()
 
 class TemperatureDecorator(BeverageDecorator):
     def __init__(self, beverage: Beverage, temp: str):
@@ -38,10 +49,14 @@ class SweetnessDecorator(BeverageDecorator):
 class Milk(BeverageDecorator):
     def get_description(self) -> str: return f"{self._beverage.get_description()} (+Milk)"
     def cost(self) -> float: return self._beverage.cost() + 15.0
+    def get_required_ingredients(self) -> list:
+        return self._beverage.get_required_ingredients() + [('Milk', 1)]
 
 class Syrup(BeverageDecorator):
     def get_description(self) -> str: return f"{self._beverage.get_description()} (+Syrup)"
     def cost(self) -> float: return self._beverage.cost() + 10.0
+    def get_required_ingredients(self) -> list:
+        return self._beverage.get_required_ingredients() + [('Syrup', 1)]
 
 # --- FEATURE 1: Composite Pattern (Shopping Cart) ---
 class OrderCart(Beverage):
@@ -59,6 +74,12 @@ class OrderCart(Beverage):
     
     def get_items(self):
         return self._items
+
+    def get_required_ingredients(self) -> list:
+        all_ingredients = []
+        for item in self._items:
+            all_ingredients.extend(item.get_required_ingredients())
+        return all_ingredients
 
 # --- FEATURE 2: Chain of Responsibility (Discount & Tax) ---
 class PriceHandler(ABC):
@@ -89,8 +110,9 @@ class CouponHandler(PriceHandler):
         return amount
 
 class VatHandler(PriceHandler):
+    """Tax Handler - ปัจจุบันร้านใช้ราคา Net (ไม่มีการคิดภาษี VAT 7% เพิ่มเติม)"""
     def handle(self, amount: float, promo_code: str) -> float:
-        amount = amount * 1.07 # Add 7% VAT
+        # ไม่คิดภาษี VAT เพิ่มเติม (ราคาสุทธิ Net Price)
         if self.next_handler:
             return self.next_handler.handle(amount, promo_code)
         return amount
@@ -107,13 +129,17 @@ class InventoryManager:
     def deduct_stock(self, item_name: str, qty: int = 1) -> bool:
         from .models import InventoryItem
         try:
-            item = InventoryItem.objects.get(name__icontains=item_name)
-            if item.quantity >= qty:
+            # Exact match (case-insensitive) first, then fallback to contains
+            item = InventoryItem.objects.filter(name__iexact=item_name).first()
+            if not item:
+                item = InventoryItem.objects.filter(name__icontains=item_name).first()
+                
+            if item and item.quantity >= qty:
                 item.quantity -= qty
                 item.save()
                 return True
             return False
-        except InventoryItem.DoesNotExist:
+        except Exception:
             return False
         
     def get_stock(self):
@@ -200,30 +226,78 @@ class TxtReportGenerator(SalesReportTemplate):
             lines.append(f"Order #{o['id']} [{o['status']}]: {o['description']} -> {o['total_cost']} THB")
         return "\n".join(lines)
 
-# --- Facade Pattern (Checkout Process Updated) ---
+# --- FEATURE 6: Strategy Pattern (Payment Processing) ---
+class PaymentStrategy(ABC):
+    @abstractmethod
+    def pay(self, amount: float) -> dict:
+        """Process payment and return result dictionary with receipt info"""
+        pass
+
+class CashPayment(PaymentStrategy):
+    def __init__(self, amount_tendered: float = None):
+        self.amount_tendered = float(amount_tendered) if amount_tendered is not None else None
+        
+    def pay(self, amount: float) -> dict:
+        amount = round(amount, 2)
+        tendered = self.amount_tendered if self.amount_tendered is not None else amount
+        if tendered < amount:
+            shortage = round(amount - tendered, 2)
+            raise ValueError(f"ยอดเงินสดไม่เพียงพอ (ยอดที่ต้องชำระ {amount} ฿, รับเงินมา {tendered} ฿, ขาดอีก {shortage} ฿)")
+        
+        change = round(tendered - amount, 2)
+        return {
+            'payment_method': 'CASH',
+            'method_name': 'เงินสด (Cash)',
+            'amount_paid': tendered,
+            'change': change,
+            'reference': f"CASH-{int(tendered)}"
+        }
+
+class PromptPayPayment(PaymentStrategy):
+    def __init__(self, reference: str = ""):
+        self.reference = reference
+        
+    def pay(self, amount: float) -> dict:
+        import uuid
+        amount = round(amount, 2)
+        ref = self.reference or f"PP-{uuid.uuid4().hex[:8].upper()}"
+        return {
+            'payment_method': 'PROMPTPAY',
+            'method_name': 'พร้อมเพย์ QR (PromptPay)',
+            'amount_paid': amount,
+            'change': 0.0,
+            'reference': ref
+        }
+
+# --- Facade Pattern (Checkout Process Orchestrator) ---
 class CheckoutFacade:
     def __init__(self):
         self.inventory = InventoryManager()
         # Chain setup: Coupon -> VAT
         self.pricing_chain = CouponHandler(VatHandler())
         
-    def place_order(self, cart: OrderCart, promo_code: str = ""):
+    def place_order(self, cart: OrderCart, promo_code: str = "", payment_strategy: PaymentStrategy = None):
         if not cart.get_items():
             raise ValueError("Cart is empty")
 
         base_amount = cart.cost()
         final_amount = self.pricing_chain.handle(base_amount, promo_code)
+        final_amount = round(final_amount, 2)
         
-        # Deduct Inventory
-        for item in cart.get_items():
-            desc = item.get_description()
-            if "Espresso" in desc: self.inventory.deduct_stock('coffee_beans')
-            elif "Tea" in desc: self.inventory.deduct_stock('tea_leaves')
-            if "Milk" in desc: self.inventory.deduct_stock('milk')
-            if "Syrup" in desc: self.inventory.deduct_stock('syrup')
+        # 1. Process payment via Strategy Pattern
+        if payment_strategy is None:
+            payment_strategy = CashPayment(amount_tendered=final_amount)
+            
+        payment_info = payment_strategy.pay(final_amount)
+        
+        # 2. Deduct Inventory based on Recipe Model & Decorators (No naive string matching!)
+        required_ingredients = cart.get_required_ingredients()
+        for ing_name, ing_qty in required_ingredients:
+            self.inventory.deduct_stock(ing_name, ing_qty)
         
         return {
             'description': cart.get_description(),
-            'total_cost': round(final_amount, 2),
-            'initial_status': PendingState().get_db_value()
+            'total_cost': final_amount,
+            'initial_status': PendingState().get_db_value(),
+            'payment_info': payment_info
         }
