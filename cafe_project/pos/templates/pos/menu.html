@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafe POS - Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-stone-100 text-stone-800 font-sans p-6 md:p-12">
+    <!-- Navbar -->
+    <nav class="mb-8 flex space-x-4 items-center bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+        <div class="text-2xl font-bold text-amber-800 mr-4 tracking-tight">☕ CozyCafe POS</div>
+        <a href="{% url 'menu' %}" class="px-4 py-2 bg-amber-700 text-white font-semibold rounded-lg shadow hover:bg-amber-800 transition">Menu</a>
+        <a href="{% url 'cart' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Cart ({{ cart_count }})</a>
+        <a href="{% url 'barista' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Barista KDS</a>
+        <a href="{% url 'inventory' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Inventory</a>
+        <a href="{% url 'custom_admin' %}" class="px-4 py-2 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition ml-auto">Manager Admin</a>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="p-4 mb-2 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-800{% endif %} shadow-sm border">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-end mb-6 border-b border-amber-200 pb-2">
+            <h2 class="text-3xl font-bold text-amber-900 font-serif">Our Menu</h2>
+            <span class="text-xs font-semibold text-amber-700 bg-amber-100 px-3 py-1 rounded-full border border-amber-200">DB Models + Decorator Pattern</span>
+        </div>
+
+        <!-- Category Navigation Buttons -->
+        <div class="flex items-center space-x-2.5 mb-8 overflow-x-auto pb-2">
+            <button type="button" onclick="filterMenu('all')" id="btn-filter-all" class="menu-filter-btn px-5 py-2.5 rounded-full font-bold text-sm transition shadow-xs bg-amber-800 text-white flex items-center space-x-2">
+                <span>ทั้งหมด</span>
+            </button>
+            <button type="button" onclick="filterMenu('drink')" id="btn-filter-drink" class="menu-filter-btn px-5 py-2.5 rounded-full font-bold text-sm transition shadow-xs bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 flex items-center space-x-2">
+                <span>เครื่องดื่ม</span>
+            </button>
+            <button type="button" onclick="filterMenu('dessert')" id="btn-filter-dessert" class="menu-filter-btn px-5 py-2.5 rounded-full font-bold text-sm transition shadow-xs bg-white text-stone-700 hover:bg-stone-100 border border-stone-200 flex items-center space-x-2">
+                <span>ของหวาน</span>
+            </button>
+        </div>
+
+        <!-- No Results Notice -->
+        <div id="no-filter-results" class="hidden text-center py-12 bg-white rounded-xl shadow-sm border border-stone-200 mb-10">
+            <h3 class="text-xl text-stone-500 mb-2">ไม่พบเมนูในหมวดหมู่นี้</h3>
+            <button onclick="filterMenu('all')" class="text-amber-800 hover:underline text-sm font-semibold">แสดงเมนูทั้งหมด</button>
+        </div>
+
+        {% for category in categories %}
+        <div class="mb-10 category-section">
+            <h3 class="text-2xl font-semibold text-stone-800 mb-6 font-serif border-l-4 border-amber-600 pl-3">{{ category.name }}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {% for item in category.menuitem_set.all %}
+                <div class="menu-card bg-white rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition duration-300 border border-stone-100" data-type="{% if item.is_drink %}drink{% else %}dessert{% endif %}">
+                    <img src="{{ item.get_image }}" alt="{{ item.name }}" class="w-full h-48 object-cover bg-stone-100">
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="text-lg font-bold text-stone-900">{{ item.name }}</h4>
+                            <span class="text-amber-700 font-bold bg-amber-50 px-2 py-1 rounded">{{ item.price }} ฿</span>
+                        </div>
+                        
+                        <div class="mt-auto pt-4">
+                            <button type="button" 
+                                    onclick="openOrderModal('{{ item.id }}', '{{ item.name|escapejs }}', '{{ item.price }}', '{{ item.get_image }}', {{ item.is_drink|yesno:'true,false' }})" 
+                                    class="w-full py-2.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-lg shadow-sm hover:shadow transition flex items-center justify-center space-x-1.5 text-sm">
+                                <span>เพิ่มลงตะกร้า</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-stone-500 italic">No items in this category yet. Add some in the Admin Panel.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-12 bg-white rounded-xl shadow-sm border border-stone-200">
+            <h3 class="text-xl text-stone-500 mb-4">No menu items found.</h3>
+            <a href="{% url 'custom_admin' %}" class="px-6 py-3 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition">Go to Admin to add items</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Order Customization Modal -->
+    <div id="orderModal" class="fixed inset-0 bg-stone-950/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col">
+            
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-stone-200 bg-stone-50 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <img id="modal_item_img" src="" alt="" class="w-12 h-12 rounded-lg object-cover border border-stone-200 bg-white">
+                    <div>
+                        <h3 id="modal_item_name" class="font-bold text-stone-900 text-base leading-tight"></h3>
+                        <span id="modal_item_price" class="text-amber-800 font-black text-sm"></span>
+                    </div>
+                </div>
+                <button type="button" onclick="closeOrderModal()" class="text-stone-400 hover:text-stone-600 font-bold text-2xl leading-none p-1">&times;</button>
+            </div>
+
+            <!-- Modal Form Body -->
+            <form id="orderForm" method="POST" class="p-5 overflow-y-auto space-y-5 flex-1">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" id="modal_item_id">
+
+                <!-- Drink Options Section (Shown only if is_drink is true) -->
+                <div id="drink_options_container" class="space-y-4">
+                    
+                    <!-- 1. Temperature (ร้อน / เย็น) -->
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+                            1. ประเภท (Temperature)
+                        </label>
+                        <div class="grid grid-cols-2 gap-2.5">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="temperature" value="เย็น" checked class="peer sr-only">
+                                <div class="p-2.5 text-center rounded-xl border border-stone-200 bg-stone-50 peer-checked:bg-sky-50 peer-checked:border-sky-500 peer-checked:text-sky-800 font-bold text-sm transition flex items-center justify-center space-x-1.5 shadow-2xs">
+                                    <span>เย็น (Iced)</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="temperature" value="ร้อน" class="peer sr-only">
+                                <div class="p-2.5 text-center rounded-xl border border-stone-200 bg-stone-50 peer-checked:bg-orange-50 peer-checked:border-orange-500 peer-checked:text-orange-800 font-bold text-sm transition flex items-center justify-center space-x-1.5 shadow-2xs">
+                                    <span>ร้อน (Hot)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 2. Sweetness Level (ระดับความหวาน) -->
+                    <div>
+                        <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+                            2. ระดับความหวาน (Sweetness)
+                        </label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="sweetness" value="100%" checked class="peer sr-only">
+                                <div class="p-2 text-center rounded-xl border border-stone-200 bg-stone-50 peer-checked:bg-amber-100 peer-checked:border-amber-600 peer-checked:text-amber-900 font-bold text-xs transition shadow-2xs">
+                                    <span>100% (ปกติ)</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="sweetness" value="50%" class="peer sr-only">
+                                <div class="p-2 text-center rounded-xl border border-stone-200 bg-stone-50 peer-checked:bg-amber-100 peer-checked:border-amber-600 peer-checked:text-amber-900 font-bold text-xs transition shadow-2xs">
+                                    <span>50% (หวานน้อย)</span>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="sweetness" value="0%" class="peer sr-only">
+                                <div class="p-2 text-center rounded-xl border border-stone-200 bg-stone-50 peer-checked:bg-amber-100 peer-checked:border-amber-600 peer-checked:text-amber-900 font-bold text-xs transition shadow-2xs">
+                                    <span>0% (ไม่หวาน)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 3. Add-ons (Decorator Pattern) -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-bold text-stone-700 uppercase tracking-wider">
+                                3. ตัวเลือกเพิ่มเติม (Add-ons)
+                            </label>
+                            <span class="text-[10px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 font-semibold">Decorator</span>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 transition cursor-pointer">
+                                <div class="flex items-center space-x-2.5">
+                                    <input type="checkbox" id="modal_milk" name="milk" value="true" onchange="calculateModalTotal()" class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                                    <span class="text-stone-800 text-sm font-semibold">เพิ่มนมสด (Fresh Milk)</span>
+                                </div>
+                                <span class="text-amber-800 font-bold text-xs">+15 ฿</span>
+                            </label>
+                            <label class="flex items-center justify-between p-2.5 rounded-xl border border-stone-200 hover:bg-stone-50 transition cursor-pointer">
+                                <div class="flex items-center space-x-2.5">
+                                    <input type="checkbox" id="modal_syrup" name="syrup" value="true" onchange="calculateModalTotal()" class="w-4 h-4 text-amber-600 rounded border-stone-300 focus:ring-amber-500">
+                                    <span class="text-stone-800 text-sm font-semibold">เพิ่มคาราเมลไซรัป (Syrup)</span>
+                                </div>
+                                <span class="text-amber-800 font-bold text-xs">+10 ฿</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Quantity Selector (+ -) -->
+                <div class="pt-2 border-t border-stone-100">
+                    <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider mb-2">
+                        จำนวน (Quantity)
+                    </label>
+                    <div class="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                        <span class="text-sm font-medium text-stone-600">ระบุจำนวนที่ต้องการสั่ง</span>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="changeModalQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-stone-300 text-stone-700 font-black text-base flex items-center justify-center hover:bg-stone-100 shadow-2xs transition leading-none focus:outline-none">
+                                -
+                            </button>
+                            <input type="number" id="modal_qty" name="quantity" value="1" min="1" max="99" class="w-10 text-center font-black text-stone-900 bg-transparent text-base focus:outline-none" readonly>
+                            <button type="button" onclick="changeModalQty(1)" class="w-8 h-8 rounded-lg bg-amber-800 text-white font-black text-base flex items-center justify-center hover:bg-amber-900 shadow-2xs transition leading-none focus:outline-none">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3.5 bg-amber-800 hover:bg-amber-900 text-white font-bold rounded-xl shadow-md transition flex items-center justify-between px-5">
+                        <span>ใส่ถาดสินค้า</span>
+                        <span id="modal_total_price" class="font-black text-lg"></span>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+    let currentBasePrice = 0;
+
+    function openOrderModal(id, name, price, imgUrl, isDrink) {
+        currentBasePrice = parseFloat(price);
+        document.getElementById('modal_item_id').value = id;
+        document.getElementById('modal_item_name').textContent = name;
+        document.getElementById('modal_item_price').textContent = price + ' ฿';
+        document.getElementById('modal_item_img').src = imgUrl;
+        document.getElementById('modal_qty').value = 1;
+        
+        // Reset Add-ons
+        const milk = document.getElementById('modal_milk');
+        const syrup = document.getElementById('modal_syrup');
+        if (milk) milk.checked = false;
+        if (syrup) syrup.checked = false;
+
+        // Reset radio defaults
+        const defaultTemp = document.querySelector('input[name="temperature"][value="เย็น"]');
+        if (defaultTemp) defaultTemp.checked = true;
+        const defaultSweet = document.querySelector('input[name="sweetness"][value="100%"]');
+        if (defaultSweet) defaultSweet.checked = true;
+
+        // Show/hide drink options
+        const drinkContainer = document.getElementById('drink_options_container');
+        if (isDrink) {
+            drinkContainer.classList.remove('hidden');
+        } else {
+            drinkContainer.classList.add('hidden');
+        }
+
+        calculateModalTotal();
+        document.getElementById('orderModal').classList.remove('hidden');
+    }
+
+    function closeOrderModal() {
+        document.getElementById('orderModal').classList.add('hidden');
+    }
+
+    function changeModalQty(delta) {
+        const qtyInput = document.getElementById('modal_qty');
+        let val = parseInt(qtyInput.value || 1) + delta;
+        if (val < 1) val = 1;
+        qtyInput.value = val;
+        calculateModalTotal();
+    }
+
+    function calculateModalTotal() {
+        let unitPrice = currentBasePrice;
+        const milk = document.getElementById('modal_milk');
+        const syrup = document.getElementById('modal_syrup');
+        
+        const drinkContainer = document.getElementById('drink_options_container');
+        if (drinkContainer && !drinkContainer.classList.contains('hidden')) {
+            if (milk && milk.checked) unitPrice += 15.0;
+            if (syrup && syrup.checked) unitPrice += 10.0;
+        }
+
+        const qty = parseInt(document.getElementById('modal_qty').value || 1);
+        const total = unitPrice * qty;
+        document.getElementById('modal_total_price').textContent = total.toFixed(2) + ' ฿';
+    }
+
+    function filterMenu(type) {
+        const cards = document.querySelectorAll('.menu-card');
+        const sections = document.querySelectorAll('.category-section');
+        const noResults = document.getElementById('no-filter-results');
+        
+        // Reset all filter buttons
+        document.querySelectorAll('.menu-filter-btn').forEach(btn => {
+            btn.classList.remove('bg-amber-800', 'text-white');
+            btn.classList.add('bg-white', 'text-stone-700', 'hover:bg-stone-100', 'border', 'border-stone-200');
+        });
+        
+        // Highlight active button
+        const activeBtn = document.getElementById('btn-filter-' + type);
+        if (activeBtn) {
+            activeBtn.classList.remove('bg-white', 'text-stone-700', 'hover:bg-stone-100', 'border', 'border-stone-200');
+            activeBtn.classList.add('bg-amber-800', 'text-white');
+        }
+
+        let totalVisible = 0;
+        cards.forEach(card => {
+            const cardType = card.getAttribute('data-type');
+            if (type === 'all' || cardType === type) {
+                card.classList.remove('hidden');
+                totalVisible++;
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        // Hide category header if all items inside are hidden
+        sections.forEach(sec => {
+            const visibleInSec = sec.querySelectorAll('.menu-card:not(.hidden)');
+            if (visibleInSec.length === 0) {
+                sec.classList.add('hidden');
+            } else {
+                sec.classList.remove('hidden');
+            }
+        });
+
+        if (totalVisible === 0) {
+            noResults.classList.remove('hidden');
+        } else {
+            noResults.classList.add('hidden');
+        }
+    }
+    </script>
+</body>
+</html>
