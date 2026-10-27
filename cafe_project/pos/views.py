@@ -68,7 +68,7 @@ def cart(request):
     if request.method == 'POST':
         if 'checkout' in request.POST:
             if not cart_data:
-                messages.error(request, "Cart is empty!")
+                messages.error(request, "ไม่มีรายการสินค้าในตะกร้า!")
                 return redirect('cart')
 
             order_cart = OrderCart()
@@ -147,7 +147,7 @@ def cart(request):
             if 0 <= index < len(request.session['cart']):
                 removed_item = request.session['cart'].pop(index)
                 request.session.modified = True
-                messages.success(request, f"Removed {removed_item['name']} from cart.")
+                messages.success(request, f"ลบ {removed_item['name']} ออกจากตะกร้าเรียบร้อยแล้ว")
             return redirect('cart')
 
         elif 'clear_cart' in request.POST:
@@ -194,8 +194,8 @@ def barista(request):
         if 'cancel' in request.POST:
             try:
                 order.cancel()
-                messages.success(request, f"Order #{order.id} was voided.")
-            except ValueError as e:
+                messages.success(request, f"ยกเลิกออเดอร์ #{order.id} เรียบร้อยแล้ว")
+            except Exception as e:
                 messages.error(request, str(e))
         else:
             order.proceed()
@@ -272,7 +272,7 @@ def custom_admin(request):
                 image=request.FILES.get('image'),
                 is_drink=request.POST.get('is_drink') == 'on'
             )
-            messages.success(request, "Menu item added!")
+            messages.success(request, "เพิ่มรายการเมนูใหม่เรียบร้อยแล้ว!")
             
         elif action == 'edit_menu':
             item = MenuItem.objects.get(id=request.POST.get('item_id'))
@@ -283,24 +283,24 @@ def custom_admin(request):
                 item.image = request.FILES.get('image')
             item.is_drink = request.POST.get('is_drink') == 'on'
             item.save()
-            messages.success(request, f"Menu item '{item.name}' updated!")
+            messages.success(request, f"แก้ไขข้อมูลเมนู '{item.name}' สำเร็จแล้ว!")
             
         elif action == 'delete_menu':
             MenuItem.objects.filter(id=request.POST.get('item_id')).delete()
-            messages.success(request, "Menu item deleted!")
+            messages.success(request, "ลบรายการเมนูเรียบร้อยแล้ว!")
             
         elif action == 'add_inventory':
             InventoryItem.objects.create(
                 name=request.POST.get('name'),
                 quantity=request.POST.get('quantity')
             )
-            messages.success(request, "Inventory item added!")
+            messages.success(request, "เพิ่มรายการวัตถุดิบเข้าคลังสำเร็จแล้ว!")
             
         elif action == 'update_inventory':
             item = InventoryItem.objects.get(id=request.POST.get('item_id'))
             item.quantity = request.POST.get('quantity')
             item.save()
-            messages.success(request, "Inventory updated!")
+            messages.success(request, "อัปเดตสต็อกวัตถุดิบเรียบร้อยแล้ว!")
             
         elif action == 'add_discount':
             DiscountCode.objects.create(
@@ -308,11 +308,11 @@ def custom_admin(request):
                 discount_amount=request.POST.get('discount_amount') or 0,
                 discount_percent=request.POST.get('discount_percent') or 0
             )
-            messages.success(request, "Discount code created!")
+            messages.success(request, "สร้างโค้ดส่วนลดเรียบร้อยแล้ว!")
             
         elif action == 'delete_discount':
             DiscountCode.objects.filter(id=request.POST.get('code_id')).delete()
-            messages.success(request, "Discount code deleted!")
+            messages.success(request, "ลบโค้ดส่วนลดเรียบร้อยแล้ว!")
             
         elif action == 'add_recipe':
             menu_id = request.POST.get('menu_id')

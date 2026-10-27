@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="refresh" content="10">
-    <title>Cafe POS - Barista KDS</title>
+    <title>CozyCafe - ครัวบาริสต้า (Barista KDS)</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-stone-100 text-stone-800 font-sans p-4 md:p-8 min-h-screen flex flex-col">
     <!-- Navbar -->
     <nav class="mb-8 flex flex-wrap gap-2 items-center bg-white p-4 rounded-xl shadow-sm border border-stone-200">
         <div class="text-2xl font-bold text-amber-800 mr-4 tracking-tight">☕ CozyCafe POS</div>
-        <a href="{% url 'menu' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Menu</a>
-        <a href="{% url 'cart' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Cart</a>
-        <a href="{% url 'customer_queue' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Customer Queue</a>
-        <a href="{% url 'barista' %}" class="px-4 py-2 bg-amber-700 text-white font-semibold rounded-lg shadow hover:bg-amber-800 transition">Barista KDS</a>
-        <a href="{% url 'inventory' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Inventory</a>
-        <a href="{% url 'custom_admin' %}" class="px-4 py-2 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition ml-auto">Manager Admin</a>
+        <a href="{% url 'menu' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">เมนู</a>
+        <a href="{% url 'cart' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">ตะกร้า</a>
+        <a href="{% url 'customer_queue' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">คิวลูกค้า</a>
+        <a href="{% url 'barista' %}" class="px-4 py-2 bg-amber-700 text-white font-semibold rounded-lg shadow hover:bg-amber-800 transition">ครัวบาริสต้า (KDS)</a>
+        <a href="{% url 'inventory' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">คลังวัตถุดิบ</a>
+        <a href="{% url 'custom_admin' %}" class="px-4 py-2 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition ml-auto">ระบบจัดการร้าน</a>
     </nav>
 
     <!-- Messages -->
     {% if messages %}
-    <div class="mb-4">
+    <div class="mb-4 max-w-7xl mx-auto w-full">
         {% for message in messages %}
         <div class="p-4 mb-2 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %} shadow-sm border">
             {{ message }}
@@ -31,27 +31,27 @@
     {% endif %}
 
     <!-- Content -->
-    <div class="mb-6 flex justify-between items-end border-b border-amber-200 pb-4">
+    <div class="max-w-7xl mx-auto w-full mb-6 flex flex-col sm:flex-row justify-between sm:items-end border-b border-amber-200 pb-4 gap-4">
         <div>
             <h2 class="text-3xl font-bold text-amber-900 font-serif flex items-center">
-                Barista KDS (Kanban Board)
-                <span class="ml-4 text-xs font-semibold text-stone-500 bg-stone-200 px-2 py-1 rounded animate-pulse">Auto-updating every 10s ⏱️</span>
+                ครัวบาริสต้า Barista KDS
+                <span class="ml-4 text-xs font-semibold text-stone-500 bg-stone-200 px-2 py-1 rounded animate-pulse">อัปเดตอัตโนมัติทุก 10 วิ</span>
             </h2>
-            <p class="text-sm text-stone-500 mt-2 font-medium">State Pattern Visualization</p>
+            <p class="text-sm text-stone-500 mt-2 font-medium">แสดงผลกระบวนการ State Pattern (รอคิวชง → กำลังชง → เสร็จสิ้น) <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded ml-2 border border-amber-300">🛡️ ป้องกัน Human Error: ห้ามยกเลิกออเดอร์ที่กำลังชงอยู่ (กดปุ่ม ✕ ในช่องกำลังชงเพื่อทดสอบ)</span></p>
         </div>
         <div class="flex space-x-3">
-            <a href="{% url 'export_report' %}?format=csv" class="px-4 py-2 bg-emerald-100 text-emerald-800 text-sm font-bold rounded-lg shadow-sm border border-emerald-300 hover:bg-emerald-200 transition">Export CSV 📊</a>
-            <a href="{% url 'export_report' %}?format=txt" class="px-4 py-2 bg-blue-100 text-blue-800 text-sm font-bold rounded-lg shadow-sm border border-blue-300 hover:bg-blue-200 transition">Export TXT 📄</a>
+            <a href="{% url 'export_report' %}?format=csv" class="px-4 py-2 bg-emerald-100 text-emerald-800 text-sm font-bold rounded-lg shadow-sm border border-emerald-300 hover:bg-emerald-200 transition">ส่งออกรายงาน CSV</a>
+            <a href="{% url 'export_report' %}?format=txt" class="px-4 py-2 bg-blue-100 text-blue-800 text-sm font-bold rounded-lg shadow-sm border border-blue-300 hover:bg-blue-200 transition">ส่งออกรายงาน TXT</a>
         </div>
     </div>
 
     <!-- Kanban Board -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         
         <!-- Column 1: Pending -->
         <div class="bg-orange-50 rounded-xl border-t-4 border-orange-400 p-4 shadow-sm min-h-[500px]">
             <h3 class="text-xl font-bold text-orange-900 mb-4 flex justify-between items-center">
-                <span>To Do (Pending)</span>
+                <span>รอคิวชง (To Do)</span>
                 <span class="bg-orange-200 text-orange-800 text-xs px-2 py-1 rounded-full">{{ pending_orders|length }}</span>
             </h3>
             
@@ -62,13 +62,13 @@
                         <div class="flex items-center space-x-2">
                             <span class="font-black text-stone-800 text-lg">#{{ order.id }}</span>
                             {% if order.payment_method == 'PROMPTPAY' %}
-                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded border border-sky-200">📱 PromptPay</span>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded border border-sky-200">พร้อมเพย์</span>
                             {% else %}
-                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-200">💵 Cash</span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-200">เงินสด</span>
                             {% endif %}
                         </div>
                         <span class="text-xs font-bold {% if order.wait_mins > 5 %}text-red-600{% else %}text-stone-500{% endif %}">
-                            Wait: {{ order.wait_mins }}m
+                            รอมา: {{ order.wait_mins }} นาที
                         </span>
                     </div>
                     <p class="text-stone-700 font-medium mb-4 whitespace-pre-line leading-tight">{{ order.description }}</p>
@@ -78,21 +78,21 @@
                             {% csrf_token %}
                             <input type="hidden" name="order_id" value="{{ order.id }}">
                             <button type="submit" class="w-full py-2 bg-sky-600 text-white text-sm font-bold rounded shadow-sm hover:bg-sky-700 transition">
-                                Start Brewing ☕
+                                เริ่มชงเครื่องดื่ม
                             </button>
                         </form>
-                        <form method="POST">
+                        <form method="POST" onsubmit="return confirm('ยืนยันยกเลิกออเดอร์ #{{ order.id }}?');">
                             {% csrf_token %}
                             <input type="hidden" name="order_id" value="{{ order.id }}">
                             <input type="hidden" name="cancel" value="1">
-                            <button type="submit" class="py-2 px-3 bg-red-100 text-red-600 text-sm font-bold rounded shadow-sm hover:bg-red-200 transition border border-red-200" title="Void Ticket">
-                                X
+                            <button type="submit" class="py-2 px-3 bg-red-100 text-red-600 text-sm font-bold rounded shadow-sm hover:bg-red-200 transition border border-red-200" title="ยกเลิกออเดอร์">
+                                ✕
                             </button>
                         </form>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-center text-orange-400 italic text-sm mt-8">No pending orders.</p>
+                <p class="text-center text-orange-400 italic text-sm mt-8">ไม่มีออเดอร์ที่รอชงในขณะนี้</p>
                 {% endfor %}
             </div>
         </div>
@@ -100,7 +100,7 @@
         <!-- Column 2: Brewing -->
         <div class="bg-sky-50 rounded-xl border-t-4 border-sky-400 p-4 shadow-sm min-h-[500px]">
             <h3 class="text-xl font-bold text-sky-900 mb-4 flex justify-between items-center">
-                <span>In Progress (Brewing)</span>
+                <span>กำลังชง (In Progress)</span>
                 <span class="bg-sky-200 text-sky-800 text-xs px-2 py-1 rounded-full">{{ brewing_orders|length }}</span>
             </h3>
             
@@ -111,27 +111,35 @@
                         <div class="flex items-center space-x-2">
                             <span class="font-black text-stone-800 text-lg">#{{ order.id }}</span>
                             {% if order.payment_method == 'PROMPTPAY' %}
-                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded border border-sky-200">📱 PromptPay</span>
+                            <span class="text-[10px] bg-sky-100 text-sky-800 font-bold px-1.5 py-0.5 rounded border border-sky-200">พร้อมเพย์</span>
                             {% else %}
-                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-200">💵 Cash</span>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded border border-emerald-200">เงินสด</span>
                             {% endif %}
                         </div>
-                        <span class="text-xs font-bold text-stone-500">Wait: {{ order.wait_mins }}m</span>
+                        <span class="text-xs font-bold text-stone-500">รอมา: {{ order.wait_mins }} นาที</span>
                     </div>
                     <p class="text-stone-700 font-medium mb-4 whitespace-pre-line leading-tight">{{ order.description }}</p>
                     
-                    <div class="pt-2 border-t border-stone-100">
-                        <form method="POST">
+                    <div class="flex space-x-2 pt-2 border-t border-stone-100">
+                        <form method="POST" class="flex-1">
                             {% csrf_token %}
                             <input type="hidden" name="order_id" value="{{ order.id }}">
                             <button type="submit" class="w-full py-2 bg-emerald-600 text-white text-sm font-bold rounded shadow-sm hover:bg-emerald-700 transition">
-                                Complete Order ✔️
+                                ชงเสร็จสิ้นพร้อมเสิร์ฟ
+                            </button>
+                        </form>
+                        <form method="POST" onsubmit="return confirm('ยืนยันขอยกเลิกออเดอร์ #{{ order.id }}? (ทดสอบระบบ State Pattern: ห้ามยกเลิกขณะชง)');">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <input type="hidden" name="cancel" value="1">
+                            <button type="submit" class="py-2 px-3 bg-red-100 text-red-600 text-sm font-bold rounded shadow-sm hover:bg-red-200 transition border border-red-200" title="ขอยกเลิกออเดอร์ (ทดสอบ State Exception ป้องกัน Human Error)">
+                                ✕
                             </button>
                         </form>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-center text-sky-400 italic text-sm mt-8">No orders are brewing right now.</p>
+                <p class="text-center text-sky-400 italic text-sm mt-8">ไม่มีออเดอร์ที่กำลังชงในขณะนี้</p>
                 {% endfor %}
             </div>
         </div>
@@ -139,7 +147,7 @@
         <!-- Column 3: Completed -->
         <div class="bg-emerald-50 rounded-xl border-t-4 border-emerald-400 p-4 shadow-sm min-h-[500px] opacity-75">
             <h3 class="text-xl font-bold text-emerald-900 mb-4 flex justify-between items-center">
-                <span>Done (Recent)</span>
+                <span>เสร็จสิ้นล่าสุด (Recent)</span>
                 <span class="bg-emerald-200 text-emerald-800 text-xs px-2 py-1 rounded-full">{{ completed_orders|length }}</span>
             </h3>
             
@@ -148,12 +156,12 @@
                 <div class="bg-white p-3 rounded-lg shadow-sm border-l-4 border-emerald-400">
                     <div class="flex justify-between items-center mb-1">
                         <span class="font-bold text-stone-500">#{{ order.id }}</span>
-                        <span class="text-xs font-bold text-emerald-600">Done</span>
+                        <span class="text-xs font-bold text-emerald-600">เสร็จสิ้น</span>
                     </div>
                     <p class="text-stone-500 text-sm truncate">{{ order.description }}</p>
                 </div>
                 {% empty %}
-                <p class="text-center text-emerald-400 italic text-sm mt-8">No completed orders yet.</p>
+                <p class="text-center text-emerald-400 italic text-sm mt-8">ยังไม่มีออเดอร์ที่ทำเสร็จในขณะนี้</p>
                 {% endfor %}
             </div>
         </div>

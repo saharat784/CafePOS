@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CozyCafe - Customer Queue Display</title>
+    <title>CozyCafe - จอแสดงคิวลูกค้า</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-stone-100 text-stone-800 font-sans p-4 md:p-8 min-h-screen flex flex-col">
     <!-- Navbar -->
     <nav class="mb-8 flex flex-wrap gap-2 items-center bg-white p-4 rounded-xl shadow-sm border border-stone-200">
         <div class="text-2xl font-bold text-amber-800 mr-4 tracking-tight">☕ CozyCafe POS</div>
-        <a href="{% url 'menu' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Menu</a>
-        <a href="{% url 'cart' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Cart</a>
-        <a href="{% url 'customer_queue' %}" class="px-4 py-2 bg-amber-700 text-white font-semibold rounded-lg shadow hover:bg-amber-800 transition">Customer Queue</a>
-        <a href="{% url 'barista' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Barista KDS</a>
-        <a href="{% url 'inventory' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">Inventory</a>
-        <a href="{% url 'custom_admin' %}" class="px-4 py-2 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition ml-auto">Manager Admin</a>
+        <a href="{% url 'menu' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">เมนู</a>
+        <a href="{% url 'cart' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">ตะกร้า</a>
+        <a href="{% url 'customer_queue' %}" class="px-4 py-2 bg-amber-700 text-white font-semibold rounded-lg shadow hover:bg-amber-800 transition">คิวลูกค้า</a>
+        <a href="{% url 'barista' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">ครัวบาริสต้า (KDS)</a>
+        <a href="{% url 'inventory' %}" class="px-4 py-2 bg-stone-200 text-stone-700 font-semibold rounded-lg shadow hover:bg-stone-300 transition">คลังวัตถุดิบ</a>
+        <a href="{% url 'custom_admin' %}" class="px-4 py-2 bg-stone-800 text-amber-50 font-semibold rounded-lg shadow hover:bg-stone-900 transition ml-auto">ระบบจัดการร้าน</a>
     </nav>
 
     <!-- Header Section with Clock and Sound Control -->
@@ -24,7 +24,7 @@
             <div>
                 <div class="flex items-center space-x-3">
                     <span class="text-3xl">☕</span>
-                    <h1 class="text-3xl font-extrabold tracking-wide font-serif text-amber-400">CUSTOMER ORDER QUEUE</h1>
+                    <h1 class="text-3xl font-extrabold tracking-wide font-serif text-amber-400">หน้าจอคิวสั่งซื้อลูกค้า (ORDER QUEUE)</h1>
                 </div>
                 <p class="text-stone-400 text-sm mt-1">จอแสดงสถานะคิวรับเครื่องดื่มแบบ Real-time</p>
             </div>
@@ -33,7 +33,7 @@
                 <!-- Clock -->
                 <div class="text-center bg-stone-800/80 px-4 py-2 rounded-xl border border-stone-700 shadow-inner">
                     <span id="live-clock" class="text-2xl font-mono font-bold text-amber-300">--:--:--</span>
-                    <div class="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">Live Time</div>
+                    <div class="text-[10px] text-stone-400 uppercase tracking-widest font-semibold">เวลาปัจจุบัน</div>
                 </div>
 
                 <!-- Live Status & Audio Toggle -->
@@ -44,7 +44,7 @@
                     </button>
                     <span class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-950 text-emerald-400 rounded-xl text-xs font-bold border border-emerald-800">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        Live Connected
+                        เชื่อมต่อระบบสด
                     </span>
                 </div>
             </div>
@@ -53,12 +53,12 @@
         <!-- Customer Queue Number Search Bar -->
         <div class="mt-6 pt-4 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="text-xs text-stone-400 font-medium flex items-center gap-2">
-                <span>💡 ระบบจะอัปเดตสถานะอัตโนมัติเมื่อบาริสต้าเริ่มชงหรือชงเสร็จ</span>
+                <span>ระบบจะอัปเดตสถานะอัตโนมัติเมื่อบาริสต้าเริ่มชงหรือชงเสร็จ</span>
             </div>
             <div class="flex items-center space-x-2 w-full sm:w-auto">
                 <input id="search-order-input" type="number" placeholder="ใส่เลขคิวของคุณ เช่น 5" class="bg-stone-800 text-amber-200 border border-stone-700 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-amber-400 w-48 text-center placeholder-stone-500 font-bold">
                 <button onclick="checkMyOrder()" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-sm font-bold rounded-lg transition shadow">
-                    เช็คคิว 🔍
+                    เช็คคิว
                 </button>
             </div>
         </div>
@@ -72,10 +72,10 @@
         <section class="bg-white rounded-2xl shadow-md border-t-8 border-amber-500 p-6 flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-stone-200">
                 <div class="flex items-center space-x-3">
-                    <span class="text-3xl">⏳</span>
+                    <span class="text-3xl"></span>
                     <div>
                         <h2 class="text-2xl font-black text-stone-800 tracking-tight">กำลังเตรียม</h2>
-                        <p class="text-xs font-bold uppercase tracking-wider text-amber-700">In Progress / Brewing</p>
+                        <p class="text-xs font-bold uppercase tracking-wider text-amber-700">กำลังดำเนินการชง (In Progress)</p>
                     </div>
                 </div>
                 <span id="preparing-count" class="bg-amber-100 text-amber-900 font-black text-lg px-4 py-1.5 rounded-full border border-amber-300 shadow-sm">
@@ -90,7 +90,7 @@
                     <div class="text-3xl font-black text-stone-800 mb-1">#{{ order.id }}</div>
                     {% if order.status == 'BREWING' %}
                     <span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase bg-amber-500 text-white px-2 py-0.5 rounded-full animate-pulse shadow-sm">
-                        <span>☕</span> กำลังชง
+                        <span></span> กำลังชง
                     </span>
                     {% else %}
                     <span class="inline-flex items-center text-[11px] font-bold uppercase bg-stone-200 text-stone-700 px-2 py-0.5 rounded-full">
@@ -110,10 +110,10 @@
         <section class="bg-white rounded-2xl shadow-md border-t-8 border-emerald-500 p-6 flex flex-col">
             <div class="flex justify-between items-center mb-6 pb-4 border-b border-stone-200">
                 <div class="flex items-center space-x-3">
-                    <span class="text-3xl animate-bounce">🔔</span>
+                    <span class="text-3xl animate-bounce"></span>
                     <div>
                         <h2 class="text-2xl font-black text-emerald-800 tracking-tight">พร้อมรับเครื่องดื่ม</h2>
-                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">Ready To Pick Up</p>
+                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-600">พร้อมรับที่เคาน์เตอร์ (Ready)</p>
                     </div>
                 </div>
                 <span id="ready-count" class="bg-emerald-100 text-emerald-900 font-black text-lg px-4 py-1.5 rounded-full border border-emerald-300 shadow-sm">
@@ -127,7 +127,7 @@
                 <div class="queue-card p-5 rounded-xl border-2 border-emerald-500 bg-gradient-to-br from-emerald-50 to-emerald-100/60 shadow-lg text-center flex flex-col justify-center items-center transition hover:scale-105 duration-200 ring-2 ring-emerald-300" data-order-id="{{ order.id }}">
                     <div class="text-4xl font-black text-emerald-950 mb-1 tracking-tight">#{{ order.id }}</div>
                     <span class="inline-flex items-center gap-1 text-xs font-black uppercase bg-emerald-600 text-white px-3 py-1 rounded-full shadow">
-                        ✨ รับที่เคาน์เตอร์
+                        รับที่เคาน์เตอร์
                     </span>
                 </div>
                 {% empty %}
@@ -320,10 +320,10 @@
 
                 if (targetCard.closest('#ready-list')) {
                     banner.className = "mt-3 p-3 rounded-lg text-sm font-bold text-center bg-emerald-100 text-emerald-900 border border-emerald-300";
-                    banner.textContent = `🎉 คิว #${val} ชงเสร็จเรียบร้อยแล้ว เชิญรับเครื่องดื่มที่เคาน์เตอร์บาร์ได้เลยค่ะ/ครับ!`;
+                    banner.textContent = `คิว #${val} ชงเสร็จเรียบร้อยแล้ว เชิญรับเครื่องดื่มที่เคาน์เตอร์บาร์ได้เลยค่ะ/ครับ!`;
                 } else {
                     banner.className = "mt-3 p-3 rounded-lg text-sm font-bold text-center bg-amber-100 text-amber-900 border border-amber-300";
-                    banner.textContent = `⏳ คิว #${val} อยู่ในสถานะกำลังเตรียม กรุณารอสักครู่นะคะ/ครับ`;
+                    banner.textContent = `คิว #${val} อยู่ในสถานะกำลังเตรียม กรุณารอสักครู่นะคะ/ครับ`;
                 }
             } else {
                 banner.className = "mt-3 p-3 rounded-lg text-sm font-bold text-center bg-stone-700 text-amber-200 border border-stone-600";

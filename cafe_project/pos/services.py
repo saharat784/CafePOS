@@ -160,25 +160,25 @@ class OrderState(ABC):
 class PendingState(OrderState):
     def next_state(self, order): order.set_state(BrewingState())
     def cancel(self, order): order.set_state(CanceledState())
-    def get_status_name(self) -> str: return "Pending"
+    def get_status_name(self) -> str: return "รอคิวชง"
     def get_db_value(self) -> str: return "PENDING"
 
 class BrewingState(OrderState):
     def next_state(self, order): order.set_state(CompletedState())
-    def cancel(self, order): raise ValueError("Cannot cancel an order that is already brewing")
-    def get_status_name(self) -> str: return "Brewing"
+    def cancel(self, order): raise Exception("ห้ามยกเลิกออเดอร์ที่กำลังชงอยู่")
+    def get_status_name(self) -> str: return "กำลังชง"
     def get_db_value(self) -> str: return "BREWING"
 
 class CompletedState(OrderState):
     def next_state(self, order): pass
-    def cancel(self, order): raise ValueError("Cannot cancel a completed order")
-    def get_status_name(self) -> str: return "Completed"
+    def cancel(self, order): raise Exception("ห้ามยกเลิกออเดอร์ที่เสร็จสิ้นแล้ว")
+    def get_status_name(self) -> str: return "เสร็จสิ้น"
     def get_db_value(self) -> str: return "COMPLETED"
 
 class CanceledState(OrderState):
     def next_state(self, order): pass
     def cancel(self, order): pass
-    def get_status_name(self) -> str: return "Canceled"
+    def get_status_name(self) -> str: return "ยกเลิก"
     def get_db_value(self) -> str: return "CANCELED"
 
 # --- FEATURE 5: Template Method Pattern (Export Report) ---
@@ -199,11 +199,11 @@ class SalesReportTemplate(ABC):
     def format_footer(self, orders_data) -> str:
         # Default footer (can be overridden)
         total = sum(order['total_cost'] for order in orders_data)
-        return f"\nTotal Revenue: {total} THB\n"
+        return f"\nยอดขายรวมทั้งหมด: {total} บาท\n"
 
 class CsvReportGenerator(SalesReportTemplate):
     def format_header(self) -> str:
-        return "ID,Description,Cost,Status\n"
+        return "รหัสออเดอร์,รายการสินค้า,ยอดชำระ,สถานะ\n"
         
     def format_body(self, orders_data) -> str:
         lines = []
@@ -214,16 +214,16 @@ class CsvReportGenerator(SalesReportTemplate):
         
     def format_footer(self, orders_data) -> str:
         total = sum(order['total_cost'] for order in orders_data)
-        return f"\n,,,TOTAL: {total}\n"
+        return f"\n,,,ยอดขายรวมทั้งหมด: {total} บาท\n"
 
 class TxtReportGenerator(SalesReportTemplate):
     def format_header(self) -> str:
-        return "=== DAILY CAFE SALES REPORT ===\n\n"
+        return "=== รายงานสรุปยอดขายประจำวัน (DAILY CAFE SALES REPORT) ===\n\n"
         
     def format_body(self, orders_data) -> str:
         lines = []
         for o in orders_data:
-            lines.append(f"Order #{o['id']} [{o['status']}]: {o['description']} -> {o['total_cost']} THB")
+            lines.append(f"ออเดอร์ #{o['id']} [{o['status']}]: {o['description']} -> {o['total_cost']} บาท")
         return "\n".join(lines)
 
 # --- FEATURE 6: Strategy Pattern (Payment Processing) ---
@@ -278,7 +278,7 @@ class CheckoutFacade:
         
     def place_order(self, cart: OrderCart, promo_code: str = "", payment_strategy: PaymentStrategy = None):
         if not cart.get_items():
-            raise ValueError("Cart is empty")
+            raise ValueError("ไม่มีรายการสินค้าในตะกร้า")
 
         base_amount = cart.cost()
         final_amount = self.pricing_chain.handle(base_amount, promo_code)
