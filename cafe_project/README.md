@@ -1,39 +1,39 @@
-# ☕ CafePOS - Smart Cafe Point of Sale & Kitchen Management System
+# CafePOS - Smart Cafe Point of Sale & Kitchen Management System
 
 [![Python](https://img.shields.io/badge/Python-3.12%2B-blue.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/Django-6.1%2B-green.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](#)
-[![Design Patterns](https://img.shields.io/badge/Design%20Patterns-8%20Patterns-purple.svg)](#-software-design-patterns)
+[![Design Patterns](https://img.shields.io/badge/Design%20Patterns-8%20Patterns-purple.svg)](#สถาปัตยกรรมและการประยุกต์ใช้-design-patterns)
 
 > **ระบบบริหารจัดการร้านกาแฟและจุดขายอัจฉริยะ (Smart Cafe POS & KDS)**
 > พัฒนาขึ้นด้วยสถาปัตยกรรม **Object-Oriented Design** และนำ **Software Design Patterns** มาประยุกต์ใช้งานจริงอย่างครอบคลุม รองรับตั้งแต่ขั้นตอนการสั่งเครื่องดื่ม, การปรับแต่งท็อปปิ้ง/ระดับความหวาน, ระบบตะกร้าสินค้า, การชำระเงินหลายรูปแบบ, ระบบตัดสต็อกตามสูตร, หน้าจอจัดคิวบาริสต้า (Kitchen Display System), ป้ายแสดงคิวลูกค้าแบบเรียลไทม์ และระบบสรุปยอดขาย
 
 ---
 
-## 📌 สารบัญ (Table of Contents)
+## สารบัญ (Table of Contents)
 
-1. [ภาพรวมระบบ (Overview)](#-ภาพรวมระบบ-overview)
-2. [ฟีเจอร์หลัก (Key Features)](#-ฟีเจอร์หลัก-key-features)
-3. [สถาปัตยกรรมและการประยุกต์ใช้ Design Patterns](#-สถาปัตยกรรมและการประยุกต์ใช้-design-patterns)
-4. [โครงสร้างฐานข้อมูล (Database Schema)](#-โครงสร้างฐานข้อมูล-database-schema)
-5. [โครงสร้างโปรเจกต์ (Project Structure)](#-โครงสร้างโปรเจกต์-project-structure)
-6. [เส้นทางและหน้าจอการทำงาน (Routes & Pages)](#-เส้นทางและหน้าจอการทำงาน-routes--pages)
-7. [วิธีการติดตั้งและรันระบบ (Installation & Getting Started)](#-วิธีการติดตั้งและรันระบบ-installation--getting-started)
-8. [เทคโนโลยีที่ใช้ (Tech Stack)](#-เทคโนโลยีที่ใช้-tech-stack)
+1. [ภาพรวมระบบ (Overview)](#ภาพรวมระบบ-overview)
+2. [ฟีเจอร์หลัก (Key Features)](#ฟีเจอร์หลัก-key-features)
+3. [สถาปัตยกรรมและการประยุกต์ใช้ Design Patterns](#สถาปัตยกรรมและการประยุกต์ใช้-design-patterns)
+4. [โครงสร้างฐานข้อมูล (Database Schema)](#โครงสร้างฐานข้อมูล-database-schema)
+5. [โครงสร้างโปรเจกต์ (Project Structure)](#โครงสร้างโปรเจกต์-project-structure)
+6. [เส้นทางและหน้าจอการทำงาน (Routes & Pages)](#เส้นทางและหน้าจอการทำงาน-routes--pages)
+7. [วิธีการติดตั้งและรันระบบ (Installation & Getting Started)](#วิธีการติดตั้งและรันระบบ-installation--getting-started)
+8. [เทคโนโลยีที่ใช้ (Tech Stack)](#เทคโนโลยีที่ใช้-tech-stack)
 
 ---
 
-## ☕ ภาพรวมระบบ (Overview)
+## ภาพรวมระบบ (Overview)
 
 **CafePOS** เป็นเว็บแอปพลิเคชันที่สร้างขึ้นเพื่อแก้ปัญหาและสนับสนุนการทำงานของร้านกาแฟอย่างครบวงจร:
 - **ลูกค้า/แคชเชียร์ (Cashier & Customer):** เลือกดูเมนูตามหมวดหมู่, สั่งกาแฟพร้อมปรับระดับความหวาน, เลือกร้อน/เย็น/ปั่น, เพิ่มนม/ไซรัป, คำนวณส่วนลด และเลือกชำระเงินด้วยเงินสดหรือพร้อมเพย์
-- **บาริสต้า (Barista / KDS):** หน้าจอ Kanban สำหรับรับออเดอร์, ดูระยะเวลารอคิว, เลื่อนสถานะ (รอชง ➔ กำลังชง ➔ เสร็จสิ้น) พร้อมระบบป้องกันข้อผิดพลาดในการยกเลิกออเดอร์
+- **บาริสต้า (Barista / KDS):** หน้าจอ Kanban สำหรับรับออเดอร์, ดูระยะเวลารอคิว, เลื่อนสถานะ (รอชง -> กำลังชง -> เสร็จสิ้น) พร้อมระบบป้องกันข้อผิดพลาดในการยกเลิกออเดอร์
 - **ป้ายแสดงคิวหน้าร้าน (Customer Live Queue):** แสดงคิวที่กำลังปรุงและคิวที่พร้อมรับแบบอัตโนมัติ (Live Polling)
 - **ผู้จัดการร้าน (Store Manager):** จัดการเมนู, ผูกสูตรเมนูเข้ากับวัตถุดิบ (Recipe Builder), จัดการสต็อกวัตถุดิบ, สร้างคูปองส่วนลด และ Export รายงานยอดขายเป็นไฟล์ CSV หรือ Text
 
 ---
 
-## 🚀 ฟีเจอร์หลัก (Key Features)
+## ฟีเจอร์หลัก (Key Features)
 
 | โมดูล | รายละเอียดฟังก์ชัน |
 | :--- | :--- |
@@ -47,7 +47,7 @@
 
 ---
 
-## 📐 สถาปัตยกรรมและการประยุกต์ใช้ Design Patterns
+## สถาปัตยกรรมและการประยุกต์ใช้ Design Patterns
 
 โปรเจกต์นี้ได้รับการออกแบบตามหลักการ **Software Design Patterns** จำนวน **8 รูปแบบ** ในส่วนแกนหลัก (`pos/services.py` และ `pos/models.py`):
 
@@ -138,7 +138,7 @@ classDiagram
 
 ### 5. State Pattern (วงจรสถานะของออเดอร์)
 - **ตำแหน่งโค้ด:** `pos/services.py` & `pos/models.py` (`OrderState`, `PendingState`, `BrewingState`, `CompletedState`, `CanceledState`)
-- **การนำไปใช้:** จัดการการเปลี่ยนสถานะของคำสั่งซื้อ (`PENDING` ➔ `BREWING` ➔ `COMPLETED`) และควบคุมเงื่อนไขทางธุรกิจ เช่น **ห้ามยกเลิกออเดอร์ที่อยู่ในสถานะกำลังชงหรือเสร็จสิ้นแล้ว** โดยกระจายพฤติกรรมไปยัง State Object ของสถานะนั้นๆ
+- **การนำไปใช้:** จัดการการเปลี่ยนสถานะของคำสั่งซื้อ (`PENDING` -> `BREWING` -> `COMPLETED`) และควบคุมเงื่อนไขทางธุรกิจ เช่น **ห้ามยกเลิกออเดอร์ที่อยู่ในสถานะกำลังชงหรือเสร็จสิ้นแล้ว** โดยกระจายพฤติกรรมไปยัง State Object ของสถานะนั้นๆ
 
 ```mermaid
 stateDiagram-v2
@@ -159,7 +159,7 @@ stateDiagram-v2
 
 ### 7. Template Method Pattern (โครงสร้างการออกรายงานยอดขาย)
 - **ตำแหน่งโค้ด:** `pos/services.py` (`SalesReportTemplate`, `CsvReportGenerator`, `TxtReportGenerator`)
-- **การนำไปใช้:** กำหนดโครงร่างขั้นตอนการออกรายงานในคลาสแม่ `generate_report()` (Header ➔ Body ➔ Footer) และเปิดให้คลาสลูกเขียนทับเฉพาะการจัดรูปแบบตัวอักษรของตนเอง เช่น การทำเครื่องหมายคั่นจุลภาคสำหรับ CSV หรือการจัดวรรคหน้าสำหรับ Text File
+- **การนำไปใช้:** กำหนดโครงร่างขั้นตอนการออกรายงานในคลาสแม่ `generate_report()` (Header -> Body -> Footer) และเปิดให้คลาสลูกเขียนทับเฉพาะการจัดรูปแบบตัวอักษรของตนเอง เช่น การทำเครื่องหมายคั่นจุลภาคสำหรับ CSV หรือการจัดวรรคหน้าสำหรับ Text File
 
 ### 8. Facade Pattern (ศูนย์รวมกระบวนการ Checkout)
 - **ตำแหน่งโค้ด:** `pos/services.py` (`CheckoutFacade`)
@@ -167,7 +167,7 @@ stateDiagram-v2
 
 ---
 
-## 🗄 โครงสร้างฐานข้อมูล (Database Schema)
+## โครงสร้างฐานข้อมูล (Database Schema)
 
 ```mermaid
 erDiagram
@@ -225,48 +225,48 @@ erDiagram
 
 ---
 
-## 📁 โครงสร้างโปรเจกต์ (Project Structure)
+## โครงสร้างโปรเจกต์ (Project Structure)
 
 ```text
 cafe_project/
-├── manage.py                  # สคริปต์คำสั่งจัดการ Django
-├── pyproject.toml             # ไฟล์การกำหนดค่า UV / Python Dependencies
-├── uv.lock                    # Dependency lockfile
-├── db.sqlite3                 # ฐานข้อมูล SQLite
-├── README.md                  # เอกสารอธิบายรายละเอียดโปรเจกต์
-│
-├── cafe_project/              # Django Project Settings
-│   ├── __init__.py
-│   ├── settings.py            # การตั้งค่าแอป, สื่อ (Media), ภาษา และเวลา
-│   ├── urls.py                # รูทหลักของระบบ
-│   ├── asgi.py
-│   └── wsgi.py
-│
-├── pos/                       # Core POS Application
-│   ├── admin.py               # Django Admin configuration
-│   ├── models.py              # Models: Category, MenuItem, RecipeItem, Order ฯลฯ
-│   ├── services.py            # รวมการ Implement Design Patterns ทั้ง 8 รูปแบบ
-│   ├── views.py               # View controllers จัดการหน้าจอและ REST APIs
-│   ├── urls.py                # URL endpoints ของ POS
-│   ├── tests.py               # Test suites
-│   │
-│   └── templates/pos/         # หน้าเว็บ UI (HTML + Tailwind/CSS + JS)
-│       ├── menu.html          # หน้าแสดงเมนูและปรับแต่งสินค้า
-│       ├── cart.html          # หน้าตะกร้าสินค้าและขั้นตอนชำระเงิน
-│       ├── barista.html       # หน้าจอ KDS บาริสต้า (Kanban)
-│       ├── customer_queue.html# หน้าจอแสดงคิวรับเครื่องดื่มแบบเรียลไทม์
-│       ├── inventory.html     # หน้าตรวจสอบสต็อกวัตถุดิบ
-│       └── custom_admin.html  # หน้าแดชบอร์ดจัดการเมนู/สูตร/สต็อก/คูปอง
-│
-├── media/                     # ไฟล์รูปภาพสินค้าที่อัปโหลด
-│   └── menu_images/
-│
-└── sotfwarepattern/           # สื่อและเอกสารประกอบการศึกษา Design Patterns
+|-- manage.py                  # สคริปต์คำสั่งจัดการ Django
+|-- pyproject.toml             # ไฟล์การกำหนดค่า UV / Python Dependencies
+|-- uv.lock                    # Dependency lockfile
+|-- db.sqlite3                 # ฐานข้อมูล SQLite
+|-- README.md                  # เอกสารอธิบายรายละเอียดโปรเจกต์
+|
+|-- cafe_project/              # Django Project Settings
+|   |-- __init__.py
+|   |-- settings.py            # การตั้งค่าแอป, สื่อ (Media), ภาษา และเวลา
+|   |-- urls.py                # รูทหลักของระบบ
+|   |-- asgi.py
+|   `-- wsgi.py
+|
+|-- pos/                       # Core POS Application
+|   |-- admin.py               # Django Admin configuration
+|   |-- models.py              # Models: Category, MenuItem, RecipeItem, Order ฯลฯ
+|   |-- services.py            # รวมการ Implement Design Patterns ทั้ง 8 รูปแบบ
+|   |-- views.py               # View controllers จัดการหน้าจอและ REST APIs
+|   |-- urls.py                # URL endpoints ของ POS
+|   |-- tests.py               # Test suites
+|   |
+|   `-- templates/pos/         # หน้าเว็บ UI (HTML + Tailwind/CSS + JS)
+|       |-- menu.html          # หน้าแสดงเมนูและปรับแต่งสินค้า
+|       |-- cart.html          # หน้าตะกร้าสินค้าและขั้นตอนชำระเงิน
+|       |-- barista.html       # หน้าจอ KDS บาริสต้า (Kanban)
+|       |-- customer_queue.html# หน้าจอแสดงคิวรับเครื่องดื่มแบบเรียลไทม์
+|       |-- inventory.html     # หน้าตรวจสอบสต็อกวัตถุดิบ
+|       `-- custom_admin.html  # หน้าแดชบอร์ดจัดการเมนู/สูตร/สต็อก/คูปอง
+|
+|-- media/                     # ไฟล์รูปภาพสินค้าที่อัปโหลด
+|   `-- menu_images/
+|
+`-- sotfwarepattern/           # สื่อและเอกสารประกอบการศึกษา Design Patterns
 ```
 
 ---
 
-## 🌐 เส้นทางและหน้าจอการทำงาน (Routes & Pages)
+## เส้นทางและหน้าจอการทำงาน (Routes & Pages)
 
 | Endpoint | ชื่อหน้า | คำอธิบายการทำงาน |
 | :--- | :--- | :--- |
@@ -281,7 +281,7 @@ cafe_project/
 
 ---
 
-## 🛠 วิธีการติดตั้งและรันระบบ (Installation & Getting Started)
+## วิธีการติดตั้งและรันระบบ (Installation & Getting Started)
 
 ### 1. ความต้องการเบื้องต้น (Prerequisites)
 - **Python 3.12** ขึ้นไป
@@ -323,7 +323,7 @@ python manage.py runserver
 
 ---
 
-## 💻 เทคโนโลยีที่ใช้ (Tech Stack)
+## เทคโนโลยีที่ใช้ (Tech Stack)
 
 - **Backend:** Python 3.12+, Django 6.1 (MTV Pattern)
 - **Frontend:** Django Templates, HTML5, Custom CSS / Tailwind CSS, Modern JavaScript
